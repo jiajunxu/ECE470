@@ -1,3 +1,5 @@
+# ECE 470 Final Project
+## Week1
 Steps to reproduce the results in the following vidoes on Mac OS macOS High Sierra for the first week: 
 * https://www.youtube.com/watch?v=Q86Gz2qPCgs&feature=youtu.be 
 * https://www.youtube.com/watch?v=AINoNR9a-EM&feature=youtu.be
@@ -6,7 +8,7 @@ Steps to reproduce the results in the following vidoes on Mac OS macOS High Sier
     * http://coppeliarobotics.com/files/V-REP_PRO_EDU_V3_4_0_Mac.zip
 
 1. To start the simulator, navigate to the unzipped directory in the terminal, type:
- `./vrep.app/Contents/MacOS/vrep`
+ ```./vrep.app/Contents/MacOS/vrep```
 
 1. Create another folder outside the Vrep folder, and move the following files into the new folder:
 	```
@@ -20,14 +22,14 @@ Steps to reproduce the results in the following vidoes on Mac OS macOS High Sier
 
 1. Move the robot:
 	1. To move all joints of the robot, simply execute the python script in the terminal by typing:
-		`python test.py`
+		```python test.py```
 	1. To move the cup on the table, modify the fifth line of the code from  
-		`move_all_joint = True` 
+		```move_all_joint = True``` 
 		to 
-		`move_all_joint = False`
+		```move_all_joint = False```
 
 ========================================================================================
-
+## Week2
 Steps to reproduce the results in the following vidoe on Mac OS macOS High Sierra for the second week: 
 * https://youtu.be/mMlMBneSkos
 
