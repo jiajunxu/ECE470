@@ -1,4 +1,5 @@
 # ECE 470 Final Project
+========================================================================================
 ## Week1
 Steps to reproduce the results in the following vidoes on Mac OS macOS High Sierra for the first week: 
 * https://www.youtube.com/watch?v=Q86Gz2qPCgs&feature=youtu.be 
@@ -34,11 +35,11 @@ Steps to reproduce the results in the following vidoe on Mac OS macOS High Sierr
 * https://youtu.be/mMlMBneSkos
 
 1. Open V-rep by typing the following line in the terminal under the VREP folder, and make sure the VREP is at version 3.5
-	`./vrep.app/Contents/MacOS/vrep`
+	```./vrep.app/Contents/MacOS/vrep```
 
 1. Add the week2.py and helper.py from the zip file to the vrep_code folder created last week
 
 1. In the vrep simulator, add the UR3 robot arm, move it to position (0,0,0), and attach a dummy frame to the end-effector position. Add another dummy frame, place it at any random location
 
 1. Execute the week2.py script by typing:
- `python3 week2.py`
+ ```python3 week2.py```
