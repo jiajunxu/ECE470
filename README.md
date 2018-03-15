@@ -10,9 +10,9 @@ Steps to reproduce the results in the following vidoes on Mac OS macOS High Sier
 
 1. Create another folder outside the Vrep folder, and move the following files into the new folder:
 	```
-	* vrep/programming/remoteApiBindings/python/python/vrep.py
-	* vrep/programming/remoteApiBindings/python/python/vrepConst.py
-	* vrep/programming/remoteApiBindings/lib/lib/remoteApi.dylib
+	vrep/programming/remoteApiBindings/python/python/vrep.py
+	vrep/programming/remoteApiBindings/python/python/vrepConst.py
+	vrep/programming/remoteApiBindings/lib/lib/remoteApi.dylib
 	```
 1. Add the test.py from this submission zip file to the folder from the last step
 
@@ -21,7 +21,10 @@ Steps to reproduce the results in the following vidoes on Mac OS macOS High Sier
 1. Move the robot:
 	1. To move all joints of the robot, simply execute the python script in the terminal by typing:
 		`python test.py`
-	1. To move the cup on the table, modify the fifth line of the code from  move_all_joint = True to move_all_joint = False
+	1. To move the cup on the table, modify the fifth line of the code from  
+		`move_all_joint = True` 
+		to 
+		`move_all_joint = False`
 
 ========================================================================================
 
