@@ -1,7 +1,7 @@
 import numpy as np
 import vrep
 from scipy.linalg import expm, logm, norm
-from helper import get_s, S
+from helper import get_s, screw2twist, get_quat
 import time
 import math
 
@@ -16,18 +16,6 @@ def check_error(result, name):
 	if result != vrep.simx_return_ok:
 		exception = 'could not get' + name
 		raise Exception(exception)
-
-def get_q(R):
-	W = logm(R)
-	w1 = W[2][1]
-	w2 = W[0][2]
-	w3 = W[1][0]
-	w = np.array([[w1],[w2],[w3]])
-	a = w / norm(w)
-	theta = norm(w)
-	q0 = np.cos(theta/2)
-	q123 = a * np.sin(theta/2)
-	return q123[0], q123[1], q123[2], q0
 
 # Close all open connections (just in case)
 vrep.simxFinish(-1)
@@ -103,12 +91,12 @@ M = np.array([[0,0,-1, -0.1940], [0,1,0,0], [1,0,0,0.6511], [0,0,0,1]])
 
 for i in range(3):
 	print(i)
-	T = expm(S(s1)*theta[0][i])
-	T = np.dot(T, expm(S(s2)*theta[1][i]))
-	T = np.dot(T, expm(S(s3)*theta[2][i]))
-	T = np.dot(T, expm(S(s4)*theta[3][i]))
-	T = np.dot(T, expm(S(s5)*theta[4][i]))
-	T = np.dot(T, expm(S(s6)*theta[5][i]))
+	T = expm(screw2twist(s1)*theta[0][i])
+	T = np.dot(T, expm(screw2twist(s2)*theta[1][i]))
+	T = np.dot(T, expm(screw2twist(s3)*theta[2][i]))
+	T = np.dot(T, expm(screw2twist(s4)*theta[3][i]))
+	T = np.dot(T, expm(screw2twist(s5)*theta[4][i]))
+	T = np.dot(T, expm(screw2twist(s6)*theta[5][i]))
 
 	end = np.dot(T, M)
 	# result, position = vrep.simxGetObjectPosition(clientID, frame_handle, -1, vrep.simx_opmode_streaming)
@@ -116,7 +104,8 @@ for i in range(3):
 	# result = vrep.simxSetObjectPosition(clientID, frame0_handle, -1, position, vrep.simx_opmode_oneshot)
 	# check_error(result, "frame1 position")
 
-	quat = get_q(end[0:3, 0:3])
+	quat = get_quat(end[0:3, 0:3])
+	print('quat: ', end[0:3, 0:3])
 	# result, quat = vrep.simxGetObjectQuaternion(clientID, frame0_handle, -1, vrep.simx_opmode_streaming)
 	result = vrep.simxSetObjectQuaternion(clientID, frame0_handle, -1, quat, vrep.simx_opmode_oneshot)
 	result = vrep.simxSetObjectPosition(clientID, frame0_handle, -1, end[0:3, 3], vrep.simx_opmode_oneshot)
