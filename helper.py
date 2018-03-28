@@ -1,5 +1,6 @@
 import numpy as np
 from scipy.linalg import expm, logm, norm, inv
+from pyquaternion import Quaternion
 
 def skew(w):
     a = w[0]
@@ -86,6 +87,16 @@ def get_quat(R):
     q123 = a * np.sin(theta/2)
     return q123[0], q123[1], q123[2], q0
 
+def quat2R(quat):
+    q0 = quat[3]
+    q1 = quat[0]
+    q2 = quat[1]
+    q3 = quat[2]
+    quat = Quaternion([q0, q1, q2, q3])
+    return quat.rotation_matrix
+
+
+
 # get the screw axis from the given twist
 def twist2screw(twist):
     v = np.zeros((6, 1))
@@ -111,7 +122,7 @@ def inverse_kinematics(T_2in0):
 
     i = 0
     while True:
-        if i >1000:
+        if i >10000:
             print("couldn't find the thetas")
             break
         m1 = expm(bs1*theta[0][0])
@@ -126,6 +137,7 @@ def inverse_kinematics(T_2in0):
 
         v = twist2screw(twist)
 
+        # print(norm(v))
         if norm(v) < 0.01:
             print("found theta")
             return theta
@@ -138,7 +150,8 @@ def inverse_kinematics(T_2in0):
         
         J = np.concatenate((j1,j2,j3,j4,j5,j6), axis=1)
 
-        dtheta = np.dot(inv(J), v)
+        # dtheta = np.dot(inv(J), v)
+        dtheta = np.dot(np.dot(inv(np.dot(J.T, J)+0.01*np.eye(6)), J.T), v)
         theta += dtheta
 
         i += 1
