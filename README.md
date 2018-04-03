@@ -62,7 +62,7 @@ Steps to reproduce the results in the following video on Mac OS macOS High Sierr
   ========================================================================================
 ## Week4
 Steps to reproduce the results in the following video on Mac OS macOS High Sierra for the fourth week: 
-
+* https://youtu.be/sl9AbGa7Hfg
 
 1. Open V-rep by typing the following line in the terminal under the VREP folder, and make sure the VREP is at version 3.5
 	```./vrep.app/Contents/MacOS/vrep```
