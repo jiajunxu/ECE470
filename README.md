@@ -1,7 +1,7 @@
 # ECE 470 Final Project
 ========================================================================================
 ## Week1
-Steps to reproduce the results in the following vidoes on Mac OS macOS High Sierra for the first week: 
+Steps to reproduce the results in the following videos on Mac OS macOS High Sierra for the first week: 
 * https://www.youtube.com/watch?v=Q86Gz2qPCgs&feature=youtu.be 
 * https://www.youtube.com/watch?v=AINoNR9a-EM&feature=youtu.be
 
@@ -31,7 +31,7 @@ Steps to reproduce the results in the following vidoes on Mac OS macOS High Sier
 
 ========================================================================================
 ## Week2
-Steps to reproduce the results in the following vidoe on Mac OS macOS High Sierra for the second week: 
+Steps to reproduce the results in the following video on Mac OS macOS High Sierra for the second week: 
 * https://youtu.be/mMlMBneSkos
 
 1. Open V-rep by typing the following line in the terminal under the VREP folder, and make sure the VREP is at version 3.5
@@ -46,7 +46,7 @@ Steps to reproduce the results in the following vidoe on Mac OS macOS High Sierr
 
  ========================================================================================
 ## Week3
-Steps to reproduce the results in the following vidoe on Mac OS macOS High Sierra for the third week: 
+Steps to reproduce the results in the following video on Mac OS macOS High Sierra for the third week: 
 * https://www.youtube.com/watch?v=gON0NJzTZXU&feature=youtu.be
 
 1. Open V-rep by typing the following line in the terminal under the VREP folder, and make sure the VREP is at version 3.5
@@ -61,7 +61,8 @@ Steps to reproduce the results in the following vidoe on Mac OS macOS High Sierr
  
   ========================================================================================
 ## Week4
-Steps to reproduce the results in the following vidoe on Mac OS macOS High Sierra for the fourth week: 
+Steps to reproduce the results in the following video on Mac OS macOS High Sierra for the fourth week: 
+
 
 1. Open V-rep by typing the following line in the terminal under the VREP folder, and make sure the VREP is at version 3.5
 	```./vrep.app/Contents/MacOS/vrep```
