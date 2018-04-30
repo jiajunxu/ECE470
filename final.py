@@ -116,7 +116,7 @@ def get_obj_quat(handle, obj_name):
 def get_obstacles_handles():
 	dummy = "Dummy"
 	obstacle_handle.append(get_obj_handle(dummy, vrep.simx_opmode_blocking))
-	for i in range(41-1):
+	for i in range(37-1):
 		name = dummy + str(i)
 		obstacle_handle.append(get_obj_handle(name, vrep.simx_opmode_blocking))
 
@@ -126,10 +126,13 @@ for i in range(0, 6):
 	h = get_handle(i)
 	joint_handles.append(h)
 # get the cup handle
-cup_handle = get_obj_handle('Cup0', vrep.simx_opmode_blocking)
+cup_handle = get_obj_handle('Cup', vrep.simx_opmode_blocking)
+cup_0_handle = get_obj_handle('Cup0', vrep.simx_opmode_blocking)
 # get_dummy_handle()
 ref_handle = get_obj_handle("ReferenceFrame", vrep.simx_opmode_blocking)
 ref_0_handle = get_obj_handle("ReferenceFrame0", vrep.simx_opmode_blocking)
+ref_1_handle = get_obj_handle("ReferenceFrame1", vrep.simx_opmode_blocking)
+ref_2_handle = get_obj_handle("ReferenceFrame2", vrep.simx_opmode_blocking)
 get_obstacles_handles()
 fingers_handles.append(get_obj_handle("MicoHand_fingers12_motor1", vrep.simx_opmode_blocking))
 fingers_handles.append(get_obj_handle("MicoHand_fingers12_motor2", vrep.simx_opmode_blocking))
@@ -143,14 +146,17 @@ vrep.simxStartSimulation(clientID, vrep.simx_opmode_oneshot)
 print("start simulating")
 
 # get cup position and orientation
-# result, cup_pos = vrep.simxGetObjectPosition(clientID, cup_handle, -1, vrep.simx_opmode_oneshot_wait)
+# result, cup_0_pos = vrep.simxGetObjectPosition(clientID, cup_0_handle, -1, vrep.simx_opmode_oneshot_wait)
 # check_error(result, "cup position", 1)
+cup_0_pos = get_obj_position(cup_0_handle, "cup 0 pos")
 cup_pos = get_obj_position(cup_handle, "cup pos")
-cup_quat = get_obj_quat(cup_handle, "cup quat")
+cup_quat = get_obj_quat(cup_0_handle, "cup quat")
 ref_pos = get_obj_position(ref_handle, "reference frame")
 ref_quat = get_obj_quat(ref_handle, "reference frame")
 ref_0_pos = get_obj_position(ref_0_handle, "reference frame 0")
 ref_0_quat = get_obj_quat(ref_0_handle, "reference frame 0")
+ref_1_pos = get_obj_position(ref_1_handle, "reference frame 1")
+ref_2_pos = get_obj_position(ref_2_handle, "reference frame 2")
 
 # get the obstacles' positions
 for i in range(len(obstacle_handle)):
@@ -166,7 +172,8 @@ R = quat2R(cup_quat)
 # R = np.array([[0,-1,0],[0,0,-1],[1,0,0]])
 R = np.array([[0,0,-1],[0,1,0],[1,0,0]])
 T_1[0:3,0:3] = R
-T_1[0:3,3] = np.array(cup_pos).reshape((3,))
+T_1[0:3,3] = np.array(cup_0_pos).reshape((3,))
+T_1[0][3] += 0.1
 T_1[3,3] = 1
 thetas1 = inverse_kinematics(T_1)
 
@@ -183,6 +190,14 @@ for i in range(path.shape[1]):
 		set_joint_value(j, theta[j], vrep.simx_opmode_oneshot_wait)
 	time.sleep(2)
 
+T_1[0][3] -= 0.08
+thetas = inverse_kinematics(T_1)
+# thetas1[0][0] += np.pi/15
+# thetas1[4][0] += np.pi/15
+for j in range(6):
+	set_joint_value(j, thetas[j], vrep.simx_opmode_oneshot_wait)
+	
+
 
 vrep.simxSetJointTargetVelocity(clientID, fingers_handles[0], -0.02, vrep.simx_opmode_oneshot)
 vrep.simxSetJointTargetVelocity(clientID, fingers_handles[1], -0.02, vrep.simx_opmode_oneshot)
@@ -193,12 +208,12 @@ vrep.simxSetJointTargetVelocity(clientID, fingers_handles[1], -0.02, vrep.simx_o
 ##########################################
 #######################################
 ## set goal 2
+print("on goal 2")
 T_2 = np.zeros((4,4))
-R = quat2R(ref_quat)
 # R = np.array([[0,-1,0],[0,0,-1],[1,0,0]])
-R = np.array([[0,-1,0],[0,0,-1],[1,0,0]])
+R = np.array([[0,0,1],[0,-1,0],[1,0,0]])
 T_2[0:3,0:3] = R
-T_2[0:3,3] = np.array(ref_0_pos).reshape((3,))
+T_2[0:3,3] = np.array(ref_1_pos).reshape((3,))
 T_2[3,3] = 1
 thetas2 = inverse_kinematics(T_2)
 
@@ -218,6 +233,66 @@ for i in range(path.shape[1]):
 vrep.simxSetJointTargetVelocity(clientID, fingers_handles[0], 0.02, vrep.simx_opmode_oneshot)
 vrep.simxSetJointTargetVelocity(clientID, fingers_handles[1], 0.02, vrep.simx_opmode_oneshot)
 
+
+###########################################
+##########################################
+#######################################
+## set goal 3
+print("on goal 3")
+T_2 = np.zeros((4,4))
+# R = np.array([[0,-1,0],[0,0,-1],[1,0,0]])
+R = np.array([[0,-1,0],[0,0,-1],[1,0,0]])
+T_2[0:3,0:3] = R
+T_2[0:3,3] = np.array(cup_pos).reshape((3,))
+T_2[3,3] = 1
+thetas2 = inverse_kinematics(T_2)
+
+# thetas1 = np.array([[np.pi/2],[0],[0],[0],[0],[0]])
+current_thetas = np.zeros((6,1))
+for i in range(6):
+	current_thetas[i][0] = get_joint_value(i)
+
+path = plan_path(current_thetas, thetas2, p_obstacles, r_obstacles)
+
+for i in range(path.shape[1]):
+	theta = path[:,i].reshape((6,1))
+	for j in range(6):
+		set_joint_value(j, theta[j], vrep.simx_opmode_oneshot_wait)
+	time.sleep(2)
+
+vrep.simxSetJointTargetVelocity(clientID, fingers_handles[0], -0.02, vrep.simx_opmode_oneshot)
+vrep.simxSetJointTargetVelocity(clientID, fingers_handles[1], -0.02, vrep.simx_opmode_oneshot)
+
+
+
+###########################################
+##########################################
+#######################################
+## set goal 4
+print("on goal 4")
+T_2 = np.zeros((4,4))
+# R = np.array([[0,-1,0],[0,0,-1],[1,0,0]])
+R = np.array([[0,0,1],[0,-1,0],[1,0,0]])
+T_2[0:3,0:3] = R
+T_2[0:3,3] = np.array(ref_2_pos).reshape((3,))
+T_2[3,3] = 1
+thetas2 = inverse_kinematics(T_2)
+
+# thetas1 = np.array([[np.pi/2],[0],[0],[0],[0],[0]])
+current_thetas = np.zeros((6,1))
+for i in range(6):
+	current_thetas[i][0] = get_joint_value(i)
+
+path = plan_path(current_thetas, thetas2, p_obstacles, r_obstacles)
+
+for i in range(path.shape[1]):
+	theta = path[:,i].reshape((6,1))
+	for j in range(6):
+		set_joint_value(j, theta[j], vrep.simx_opmode_oneshot_wait)
+	time.sleep(2)
+
+vrep.simxSetJointTargetVelocity(clientID, fingers_handles[0], 0.02, vrep.simx_opmode_oneshot)
+vrep.simxSetJointTargetVelocity(clientID, fingers_handles[1], 0.02, vrep.simx_opmode_oneshot)
 
 
 
@@ -269,7 +344,7 @@ vrep.simxSetJointTargetVelocity(clientID, fingers_handles[1], 0.02, vrep.simx_op
 # ##### get the goal pose 1
 # T_1 = np.zeros((4,4))
 # T_1[0:3,0:3] = R
-# T_1[0:3,3] = np.array(cup_pos).reshape((3,))
+# T_1[0:3,3] = np.array(cup_0_pos).reshape((3,))
 # T_1[3,3] = 1
 # thetas1 = inverse_kinematics(T_1)
 # print("theta: ", thetas1)
