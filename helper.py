@@ -56,16 +56,21 @@ q6 = np.array([[-0.1115], [0], [0.6511]])
 s6 = get_s(a6, q6)
 
 q7 = np.array([[-0.194],[0],[0.6511]])
-
+q_palm0 = np.array([[-0.26], [0.025], [0.65]])
+q_palm = np.array([[-0.26], [-0.025], [0.65]])
+q_f1 = np.array([[-0.325],[0.05],[0.65]])
+q_f2 = np.array([[-0.35],[0.075],[0.65]])
+q_f3 = np.array([[-0.325],[-0.05],[0.65]])
+q_f4 = np.array([[-0.35],[-0.075],[0.65]])
 qEnd = np.array([[-0.225],[0],[0.65]])
 
-p_robot = np.concatenate((q0,q1,q2,q2_5,qq3,q3_51,q3_5,qq4,qq5,q6,q7), axis=1)
-d_robot = np.array([[.1,.13,.15,.12,.12,.1, .1,.1,.1,.1,.1]])
+p_robot = np.concatenate((q0,q1,q2,q2_5,qq3,q3_51,q3_5,qq4,qq5,q6,q7,q_palm0,q_palm,q_f1,q_f2,q_f3,q_f4), axis=1)
+d_robot = np.array([[.1,.13,.15,.12,.12,.1,.1,.1,.1,.1,.1,.04,0.04,.03,.03,.03,.03]])
 r_robot = d_robot/2
 # r_robot = np.array([[.01,.09,.11,.08,.08,.1, .1,.1,.1,.1,.1]])
 # screws = np.concatenate((s1,s2,s2,s3,s3,s3,s4,s5,s6,s6), axis = 1)
 screws = np.concatenate((s1,s2,s3,s4,s5,s6), axis=1)
-M = np.array([[0,0,-1, -0.3440], [0,1,0,0], [1,0,0,0.6511], [0,0,0,1]])
+M = np.array([[0,0,-1, -0.3540], [0,1,0,0], [1,0,0,0.6511], [0,0,0,1]])
 
 # position of the joints with 1's appended at the bottom, 4x10
 p_joints = np.concatenate((p_robot, np.ones((1,p_robot.shape[1]))), axis=0)
@@ -150,9 +155,10 @@ def inverse_kinematics(T_2in0):
 
     i = 0
     while True:
-        if i >10000:
+        if i >1000:
             print("couldn't find the thetas")
-            break
+            theta = np.random.rand(6, 1)
+            # break
         m1 = expm(bs1*theta[0][0])
         m2 = np.dot(m1, expm(bs2*theta[1][0]))
         m3 = np.dot(m2, expm(bs3*theta[2][0]))
@@ -195,7 +201,7 @@ def get_robot_config(theta):
     config[:,0] = p_joints[:,0]
     config[:,1] = p_joints[:,1]
     Ts = lib.sequential_Ts(screws, theta)
-    T = [Ts[0],Ts[1], Ts[1], Ts[2],Ts[2],Ts[2],Ts[3],Ts[4],Ts[5],Ts[5]]
+    T = [Ts[0],Ts[1], Ts[1], Ts[2],Ts[2],Ts[2],Ts[3],Ts[4],Ts[5],Ts[5],Ts[5],Ts[5],Ts[5],Ts[5],Ts[5],Ts[5]]
     for i in range(len(T)):
         config[:,i+1] = np.dot(T[i], p_joints[:,i+1].reshape((4,1))).reshape((4,))
 
@@ -307,6 +313,10 @@ def get_path(theta, T_start, T_goal):
 def plan_path(start_config, goal_config, p_o, r_o):
     theta_start = start_config[:]
     theta_goal = goal_config[:]
+    if collision_given_theta(theta_start, p_o, r_o):
+        print("goal config in collision!!!!!!!!!!!!!")
+    if collision_given_theta(theta_goal, p_o, r_o):
+        print("goal config in collision!!!!!!!!!!!!!")
     T_start = {}
     T_goal = {}
     T_start[tuple(theta_start.reshape((6,)))] = None
