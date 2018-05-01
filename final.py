@@ -1,7 +1,7 @@
 import numpy as np 
 import vrep
 from scipy.linalg import expm
-from helper import get_s, screw2twist, get_quat, screws, M, inverse_kinematics, quat2R, p_robot, d_robot, get_robot_config, collision_given_theta, plan_path
+from helper import get_s, screw2twist, get_quat, screws, M, inverse_kinematics, quat2R, p_robot, r_robot, d_robot, get_robot_config, collision_given_theta, plan_path, collision_robot
 import time
 import lib as lib
 import sys
@@ -79,7 +79,7 @@ def get_obj_handle(handle_name, mode):
 def get_dummy_handle():
 	dummy = "Dummy"
 	# dummy_handles.append(get_obj_handle(dummy, vrep.simx_opmode_blocking))
-	for i in range(0,11):
+	for i in range(0,p_robot.shape[1]):
 		print(i)
 		# dummy_handles.append(get_obj_handle(dummy + str(i), vrep.simx_opmode_blocking))
 		return_code, handle = vrep.simxCreateDummy(clientID, dummy_diameter[0][i] , None,vrep.simx_opmode_blocking)
@@ -138,6 +138,20 @@ fingers_handles.append(get_obj_handle("MicoHand_fingers12_motor1", vrep.simx_opm
 fingers_handles.append(get_obj_handle("MicoHand_fingers12_motor2", vrep.simx_opmode_blocking))
 
 
+vrep.simxSetJointTargetVelocity(clientID, joint_handles[0], 0.005, vrep.simx_opmode_oneshot)
+vrep.simxSetJointTargetVelocity(clientID, joint_handles[1], 0.005, vrep.simx_opmode_oneshot)
+vrep.simxSetJointTargetVelocity(clientID, joint_handles[0], 0.005, vrep.simx_opmode_oneshot)
+vrep.simxSetJointTargetVelocity(clientID, joint_handles[1], 0.005, vrep.simx_opmode_oneshot)
+vrep.simxSetJointTargetVelocity(clientID, joint_handles[0], 0.005, vrep.simx_opmode_oneshot)
+vrep.simxSetJointTargetVelocity(clientID, joint_handles[1], 0.005, vrep.simx_opmode_oneshot)
+
+
+
+# for i in range(len(dummy_handles)):
+# 	print(i)
+# 	p_j = p_robot[0:3, i].reshape((3,1))
+# 	set_obj_position(dummy_handles[i], p_j, vrep.simx_opmode_oneshot_wait)
+# time.sleep(200)
 #############################################################
 #############################################################
 #############################################################
@@ -158,11 +172,23 @@ ref_0_quat = get_obj_quat(ref_0_handle, "reference frame 0")
 ref_1_pos = get_obj_position(ref_1_handle, "reference frame 1")
 ref_2_pos = get_obj_position(ref_2_handle, "reference frame 2")
 
+
+
+
 # get the obstacles' positions
 for i in range(len(obstacle_handle)):
 	pos = get_obj_position(obstacle_handle[i], "ob pos")
 	pos = np.array(pos).reshape((3,1))
 	p_obstacles = np.concatenate((p_obstacles, pos), axis=1) 
+
+p_obstacles = np.concatenate((p_obstacles, np.array(cup_pos).reshape((3,1))), axis=1)
+r_obstacles = np.concatenate((r_obstacles, np.array([[0.1]])),axis=1)
+p_obstacles = np.concatenate((p_obstacles, np.array(cup_0_pos).reshape((3,1))), axis=1)
+r_obstacles = np.concatenate((r_obstacles, np.array([[0.1]])),axis=1)
+# collision_robot(p_robot, r_robot, p_obstacles, r_obstacles)
+
+
+
 ########################################################
 ##########################################################
 ##########################################################
@@ -188,21 +214,30 @@ for i in range(path.shape[1]):
 	theta = path[:,i].reshape((6,1))
 	for j in range(6):
 		set_joint_value(j, theta[j], vrep.simx_opmode_oneshot_wait)
-	time.sleep(2)
+	time.sleep(1.2)
 
-T_1[0][3] -= 0.08
+vrep.simxSetJointTargetVelocity(clientID, fingers_handles[0], 0.02, vrep.simx_opmode_oneshot)
+vrep.simxSetJointTargetVelocity(clientID, fingers_handles[1], 0.02, vrep.simx_opmode_oneshot)
+
+time.sleep(1)
+
+thetas_old = path[:,path.shape[1]-1].reshape((6,1))
+T_1[0][3] -= 0.1
 thetas = inverse_kinematics(T_1)
-# thetas1[0][0] += np.pi/15
-# thetas1[4][0] += np.pi/15
-for j in range(6):
-	set_joint_value(j, thetas[j], vrep.simx_opmode_oneshot_wait)
-	
+while np.max(np.abs(thetas-thetas_old)) > np.pi/2:
+	thetas = inverse_kinematics(T_1)
+for i in range(4):
+	ts = thetas_old + ((thetas-thetas_old)/4.0) * (i+1)
+	for j in range(6):
+		set_joint_value(j, ts[j], vrep.simx_opmode_oneshot_wait)
+	time.sleep(1.2)
 
 
 vrep.simxSetJointTargetVelocity(clientID, fingers_handles[0], -0.02, vrep.simx_opmode_oneshot)
 vrep.simxSetJointTargetVelocity(clientID, fingers_handles[1], -0.02, vrep.simx_opmode_oneshot)
 
 
+p_obstacles[:,-1] = np.array([[1000],[1000],[1000]]).reshape((3,))
 
 ###########################################
 ##########################################
@@ -224,15 +259,22 @@ for i in range(6):
 
 path = plan_path(current_thetas, thetas2, p_obstacles, r_obstacles)
 
+prev_theta = current_thetas[:]
 for i in range(path.shape[1]):
 	theta = path[:,i].reshape((6,1))
-	for j in range(6):
-		set_joint_value(j, theta[j], vrep.simx_opmode_oneshot_wait)
-	time.sleep(2)
+	for k in range(4):
+		ts = prev_theta + (theta-prev_theta)/4.0 * (k+1)
+		for j in range(6):
+			set_joint_value(j, ts[j], vrep.simx_opmode_oneshot_wait)
+		time.sleep(1.2)
+	prev_theta = theta
 
 vrep.simxSetJointTargetVelocity(clientID, fingers_handles[0], 0.02, vrep.simx_opmode_oneshot)
 vrep.simxSetJointTargetVelocity(clientID, fingers_handles[1], 0.02, vrep.simx_opmode_oneshot)
 
+
+cup_0_pos = get_obj_position(cup_0_handle, "cup 0 pos")
+# p_obstacles[:,-1] = np.array(cup_0_pos).reshape((3,))
 
 ###########################################
 ##########################################
@@ -244,6 +286,7 @@ T_2 = np.zeros((4,4))
 R = np.array([[0,-1,0],[0,0,-1],[1,0,0]])
 T_2[0:3,0:3] = R
 T_2[0:3,3] = np.array(cup_pos).reshape((3,))
+T_2[1][3] += 0.1
 T_2[3,3] = 1
 thetas2 = inverse_kinematics(T_2)
 
@@ -258,13 +301,26 @@ for i in range(path.shape[1]):
 	theta = path[:,i].reshape((6,1))
 	for j in range(6):
 		set_joint_value(j, theta[j], vrep.simx_opmode_oneshot_wait)
-	time.sleep(2)
+	time.sleep(1.2)
+
+
+
+thetas_old = path[:,path.shape[1]-1].reshape((6,1))
+T_2[1][3] -= 0.1
+thetas = inverse_kinematics(T_2)
+while np.max(np.abs(thetas-thetas_old)) > np.pi/2:
+	thetas = inverse_kinematics(T_2)
+for i in range(3):
+	ts = thetas_old + ((thetas-thetas_old)/3.0) * (i+1)
+	for j in range(6):
+		set_joint_value(j, ts[j], vrep.simx_opmode_oneshot_wait)
+	time.sleep(1.2)
 
 vrep.simxSetJointTargetVelocity(clientID, fingers_handles[0], -0.02, vrep.simx_opmode_oneshot)
 vrep.simxSetJointTargetVelocity(clientID, fingers_handles[1], -0.02, vrep.simx_opmode_oneshot)
 
 
-
+p_obstacles[:,-2] = np.array([[1000],[1000],[1000]]).reshape((3,))
 ###########################################
 ##########################################
 #######################################
@@ -287,9 +343,11 @@ path = plan_path(current_thetas, thetas2, p_obstacles, r_obstacles)
 
 for i in range(path.shape[1]):
 	theta = path[:,i].reshape((6,1))
-	for j in range(6):
-		set_joint_value(j, theta[j], vrep.simx_opmode_oneshot_wait)
-	time.sleep(2)
+	for k in range(4):
+		ts = prev_theta + (theta-prev_theta)/4.0 * (k+1)
+		for j in range(6):
+			set_joint_value(j, ts[j], vrep.simx_opmode_oneshot_wait)
+	time.sleep(1.2)
 
 vrep.simxSetJointTargetVelocity(clientID, fingers_handles[0], 0.02, vrep.simx_opmode_oneshot)
 vrep.simxSetJointTargetVelocity(clientID, fingers_handles[1], 0.02, vrep.simx_opmode_oneshot)
