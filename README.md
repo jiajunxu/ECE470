@@ -93,3 +93,21 @@ Steps to reproduce the results in the following video on Mac OS macOS High Sierr
 
 1. Execute the week5.py script in a terminal by typing:
  ```python3 week5.py```
+
+
+ ========================================================================================
+## Final Demo
+Steps to reproduce the results in the following video on Mac OS macOS High Sierra for the fifth week: 
+* 
+
+1. Open V-rep by typing the following line in the terminal under the VREP folder, and make sure the VREP is at version 3.5
+	```./vrep.app/Contents/MacOS/vrep```
+
+1. Add the final.py, helper.py, and lib.py from the zip file to the vrep_code folder 
+
+1. To recreate the starting scene, add the final.ttt file to your vrep_code folder
+
+1. Open VREP, click on file on the top menu bar, select open scene, and select the .ttt file added in the previous step
+
+1. Execute the week5.py script in a terminal by typing:
+ ```python3 final.py```
