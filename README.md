@@ -97,7 +97,7 @@ Steps to reproduce the results in the following video on Mac OS macOS High Sierr
 
  ========================================================================================
 ## Final Demo
-Steps to reproduce the results in the following video on Mac OS macOS High Sierra for the fifth week: 
+Steps to reproduce the results in the following video on Mac OS macOS High Sierra for the final demo: 
 * 
 
 1. Open V-rep by typing the following line in the terminal under the VREP folder, and make sure the VREP is at version 3.5
