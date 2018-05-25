@@ -1,6 +1,4 @@
-# ECE 470 Final Project:  
-========================================================================================
-https://www.youtube.com/watch?v=NMZ6Y7S99F0
+# ECE 470 Final Project:  https://www.youtube.com/watch?v=NMZ6Y7S99F0
 ========================================================================================
 ## Week1
 Steps to reproduce the results in the following videos on Mac OS macOS High Sierra for the first week: 
